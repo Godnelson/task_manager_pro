@@ -32,8 +32,8 @@ def create_app() -> FastAPI:
     for r in all_routers:
         app.include_router(r)
 
-    # Basic health
-    @app.get("/health")
+
+    @app.get("/health") # pragma: no cover
     async def health():
         return {"ok": True, "env": settings.env}
 

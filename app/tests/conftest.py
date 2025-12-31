@@ -1,44 +1,61 @@
+import os
 import pytest
-from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy.pool import StaticPool
+from httpx import AsyncClient, ASGITransport
+from sqlalchemy.ext.asyncio import (
+    create_async_engine,
+    async_sessionmaker,
+    AsyncSession,
+)
+from sqlalchemy.pool import NullPool
 
 from app.main import create_app
-from app.core.db import Base, get_db
+from app.core.db import get_db
 
-TEST_DB_URL = "sqlite+aiosqlite://"
+from app.core.db import Base
 
-@pytest.fixture(scope="session")
+
+@pytest.fixture
 def anyio_backend():
     return "asyncio"
 
-@pytest.fixture(scope="session")
-async def engine():
-    engine = create_async_engine(
-        TEST_DB_URL,
-        connect_args={"check_same_thread": False},
-        poolclass=StaticPool,
+
+@pytest.fixture(scope="function")
+def db_url():
+    return os.getenv(
+        "DATABASE_URL",
+        "postgresql+asyncpg://postgres:postgres@db:5432/postgres",
     )
+
+
+@pytest.fixture(scope="function")
+async def engine(db_url):
+    # NullPool evita reaproveitar conexão entre loops/requests
+    engine = create_async_engine(db_url, poolclass=NullPool)
+
+    # DB limpo por teste (simples e robusto)
     async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
+
     yield engine
     await engine.dispose()
 
-@pytest.fixture
-async def db_session(engine) -> AsyncSession:
-    Session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-    async with Session() as session:
-        yield session
-        await session.rollback()
 
-@pytest.fixture
-async def client(db_session: AsyncSession):
+@pytest.fixture(scope="function")
+def session_maker(engine):
+    return async_sessionmaker(bind=engine, expire_on_commit=False)
+
+
+@pytest.fixture(scope="function")
+async def client(session_maker):
     app = create_app()
 
     async def _override_get_db():
-        yield db_session
+        async with session_maker() as session:
+            yield session
 
     app.dependency_overrides[get_db] = _override_get_db
 
-    async with AsyncClient(app=app, base_url="http://test") as ac:
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
