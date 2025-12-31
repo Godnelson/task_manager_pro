@@ -196,8 +196,8 @@ Não é um projeto didático — é um **exemplo realista de backend profissiona
 
 ## 🚀 Live Demo
 
-- **API Base URL:** https://YOUR_PROD_URL
-- **Swagger UI:** https://YOUR_PROD_URL/docs
+- **API Base URL:** https://taskmanagerpro-production.up.railway.app
+- **Swagger UI:** https://taskmanagerpro-production.up.railway.app/docs
 
 ---
 
