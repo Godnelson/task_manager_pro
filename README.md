@@ -61,6 +61,13 @@ This project is designed to demonstrate **real-world backend engineering skills*
 
 ---
 
+## 🚀 Live Demo
+
+- **API Base URL:** https://taskmanagerpro-production.up.railway.app
+- **Swagger UI:** https://taskmanagerpro-production.up.railway.app/docs
+
+---
+
 ### API Endpoints (Summary)
 
 #### Auth
@@ -184,6 +191,13 @@ Não é um projeto didático — é um **exemplo realista de backend profissiona
 - 🧪 Testes
   - Testes assíncronos
   - Cobertura mínima exigida (≥ 80%)
+
+---
+
+## 🚀 Live Demo
+
+- **API Base URL:** https://YOUR_PROD_URL
+- **Swagger UI:** https://YOUR_PROD_URL/docs
 
 ---
 
