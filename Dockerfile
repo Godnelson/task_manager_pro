@@ -13,9 +13,9 @@ RUN pip install --no-cache-dir -U pip && pip install --no-cache-dir -e ".[dev]"
 
 COPY . /app
 
-# adiciona entrypoint
-RUN chmod +x /app/entrypoint.sh
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 8000
 
-CMD ["/app/entrypoint.sh"]
+CMD ["/entrypoint.sh"]
