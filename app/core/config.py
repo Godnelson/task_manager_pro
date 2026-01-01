@@ -15,7 +15,14 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = 14
     refresh_token_pepper: str = "CHANGE_ME_PEPPER"
 
-    database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/taskdb"
+    database_url: str
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def force_asyncpg(cls, v: str) -> str:
+        if v.startswith("postgresql://"):
+            return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v
 
     @field_validator("cors_origins")
     @classmethod
